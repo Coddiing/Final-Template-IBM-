@@ -8,10 +8,21 @@ from django.urls import reverse
 from django.views import generic
 from django.contrib.auth import login, logout, authenticate
 import logging
+from .models import Course, Enrollment, Question, Choice, Submission
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 # Create your views here.
 
+def show_exam_result(request, course_id, submission_id):
+    course_obj = Course.objects.get(id=course_id) # Getting Course object
+    submission_obj = Submission.objects.get(id=submission_id) # Getting Submission object
+    
+
+def submit(request, course_id):
+    user = request.session[ 'user' ] # Getting user from session
+    course_obj = Course.objects.all() # Getting Course object
+    enroll_obj = Enrollment.objects.get( user=user, course=course_obj ) # Getting Enrollment obj
+    submission_obj = Submission.objects.create(enrollment=enroll_obj)
 
 def registration_request(request):
     context = {}
@@ -47,6 +58,7 @@ def login_request(request):
         user = authenticate(username=username, password=password)
         if user is not None:
             login(request, user)
+            request.session[ 'user' ] = username
             return redirect('onlinecourse:index')
         else:
             context['message'] = "Invalid username or password."
