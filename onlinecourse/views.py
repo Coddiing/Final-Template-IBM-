@@ -19,10 +19,28 @@ def show_exam_result(request, course_id, submission_id):
     
 
 def submit(request, course_id):
-    user = request.session[ 'user' ] # Getting user from session
-    course_obj = Course.objects.all() # Getting Course object
-    enroll_obj = Enrollment.objects.get( user=user, course=course_obj ) # Getting Enrollment obj
-    submission_obj = Submission.objects.create(enrollment=enroll_obj)
+
+    if request.method=='POST':
+        choice = request.POST[ 'choice_' ]
+        grade = 0
+        if choice.strip()=='A Framework':
+            grade = 100
+        
+        #user = request.session[ 'user' ] # Getting user from session
+        #course_obj = Course.objects.all() # Getting Course object
+        #enroll_obj = Enrollment.objects.get( user=user, course=course_obj ) # Getting Enrollment obj
+        #submission_obj = Submission.objects.create(enrollment=enroll_obj)
+
+        #if choice==1:
+        context = {
+            'choice': choice,
+            'course_id': course_id,
+            'grade': grade 
+        }
+        return render(request, 'onlinecourse/exam_result_bootstrap.html', context)
+
+        
+    return HttpResponseRedirect(reverse(viewname='onlinecourse:course_details', args=(course_id,)))
 
 def registration_request(request):
     context = {}
@@ -96,9 +114,28 @@ class CourseListView(generic.ListView):
         return courses
 
 
-class CourseDetailView(generic.DetailView):
-    model = Course
-    template_name = 'onlinecourse/course_detail_bootstrap.html'
+#class CourseDetailView(generic.DetailView):
+#    model = Course
+#    template_name = 'onlinecourse/course_detail_bootstrap.html'
+
+def course_details( request, pk ):
+    course = Course.objects.all()
+
+    count = 1
+    course_title = ''
+    for cou in course:
+        if count==pk:
+            course_title = cou
+
+    questions = Question.objects.all()
+    choices = Choice.objects.all()
+    context = {
+        'course' : course_title,
+        'questions': questions,
+        'choices': choices
+    }
+    return render(request, 'onlinecourse/course_detail_bootstrap.html', context)
+
 
 
 def enroll(request, course_id):
